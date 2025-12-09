@@ -36,15 +36,15 @@
 //     await db.query("USE vendor");
 //     console.log("Using database vendor");
 
-//     // const table = await db.execute(`
-//     // CREATE TABLE product (
-//     //     id INT AUTO_INCREMENT PRIMARY KEY,
-//     //     name VARCHAR(100) NOT NULL UNIQUE,
-//     //     price INT NOT NULL,
-//     //     description VARCHAR(300) NOT NULL
-//     // );
-//     // `);
-//     // console.log("Table created",table);
+//     const table = await db.execute(`
+//     CREATE TABLE seller (
+//         id INT AUTO_INCREMENT PRIMARY KEY,
+//         name VARCHAR(100) NOT NULL,
+//         email VARCHAR(100) NOT NULL UNIQUE,
+//         phone_no BIGINT 
+//     );
+//     `);
+//     console.log("Table created",table);
 
 //     // await db.execute(`insert into product (name, price, description) values ('camlin whiteboard black marker', 70, 'best marker')`)
 //     // console.log("values inserted into the table successfully!!!")
