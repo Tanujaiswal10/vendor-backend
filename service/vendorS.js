@@ -1,3 +1,4 @@
+require("dotenv").config();
 const db = require("../config/db")
 const  bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
@@ -40,10 +41,9 @@ exports.loginProfile = async(req,res) =>{
                 success:false,
                 message:"Incorrect Password"
         })
-
         const token = jwt.sign(
-        { id:vendor.insertId },
-         process.env.JWT_SECRET || "yourSecretKey",
+        { id:vendor.seller_id },
+         process.env.JWT_SECRET ,
         { expiresIn: "1h" }
         );
 
@@ -168,7 +168,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.getProfile = async(req,res) =>{
     try{
-        const {id} = req.params;
+        const id = req.user.id;
         const [row] = await db.query('SELECT seller_id, name, email, phone_no FROM seller WHERE seller_id = ?', [id])
 
         if(row.length == 0)

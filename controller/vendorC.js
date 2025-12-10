@@ -67,7 +67,7 @@ exports.deleteProfile = async(req,res) => {
 
 exports.getProfile = async(req,res) =>{
     try{
-        const {id} = req.params;
+        const id = req.user.id;
 
         if(!id)
             throw new Error("Please provide the Id of the Seller Account")
