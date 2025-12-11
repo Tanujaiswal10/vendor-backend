@@ -2,8 +2,8 @@ const productService = require("../service/productS")
 
 exports.createProduct = async(req,res) =>{
     try{
-        const {name,price,description} = req.body;
-        if(!name || !price || !description)
+        const {name,price,description,quantity} = req.body;
+        if(!name || !price || !description || !quantity)
         {
             return res.status(400).json({message:"Fill all the necessary feilds!"})
         }

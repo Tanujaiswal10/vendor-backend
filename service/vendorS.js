@@ -30,7 +30,7 @@ exports.loginProfile = async(req,res) =>{
           'Select * from seller where email = ?',
           [email]
         )
-        if(rows.affectedRows === 0 )
+        if(rows.length === 0 )
         {
           throw new Error("No such seller account existed")
         }
@@ -70,7 +70,7 @@ exports.deleteProfile = async (req,res) =>{
         [id]
         )
 
-        if(del.affectedRows === 0)
+        if(del.length === 0)
         {
             throw new Error ("Seller account not found")
         }

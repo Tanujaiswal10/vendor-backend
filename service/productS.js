@@ -1,29 +1,39 @@
-const db = require("../config/db")
+const db = require("../config/db");
 
-exports.create = async(req,res) => {
-    try
-    {
-        const {name,price,description} = req.body;
-        if(!name || !price || !description)
-        {
-            return res.status(400).json({message:"Fill all the necessary feilds!"})
-        }
-        const [result] = await db.query(
-            'INSERT INTO product (name,price,description) VALUES (?,?,?)',
-            [name,price,description]
-        );
-        return res.status(201).json({id:result.insertId,message:"Product Created Successfully!!"})
+exports.create = async (req, res) => {
+  try {
+    const { name, price, description, quantity } = req.body;
+    const vendor_id = req.user.id;
+    if (!name || !price || !description || !quantity) {
+      return res
+        .status(400)
+        .json({ message: "Fill all the necessary feilds!" });
     }
-    catch(error)
-    {
-        res.status(500).json({ error: error.message });
-    }
-}
+    const [result] = await db.query(
+      "INSERT INTO product (name,price,description,quantity,vendor_id) VALUES (?,?,?,?,?)",
+      [name, price, description, quantity, vendor_id]
+    );
+    return res
+      .status(201)
+      .json({ id: result.insertId, message: "Product Created Successfully!!" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.update = async (req, res) => {
   try {
+    const vendor_id = req.user.id;
     const { id } = req.params;
-    const { name, price, description } = req.body;
+    const { name, price, description, quantity } = req.body;
+
+    const checkVendor = await db.query(
+        "Select * from product where product_id = ?", 
+        [id]);
+
+
+    if (vendor_id != checkVendor[0][0].vendor_id)
+      throw new Error("You are not the seller of this product. You can not perform this operation.");
 
     const fields = [];
     const values = [];
@@ -43,13 +53,18 @@ exports.update = async (req, res) => {
       values.push(description);
     }
 
+    if (quantity !== undefined) {
+      fields.push("quantity = ?");
+      values.push(quantity);
+    }
+
     if (fields.length === 0) {
       return res
         .status(400)
         .json({ message: "Provide at least one field to update" });
     }
 
-    const sql = `UPDATE product SET ${fields.join(", ")} WHERE id = ?`;
+    const sql = `UPDATE product SET ${fields.join(", ")} WHERE product_id = ?`;
     values.push(id);
 
     const [update] = await db.query(sql, values);
@@ -65,56 +80,71 @@ exports.update = async (req, res) => {
   }
 };
 
+exports.delete = async (req, res) => {
+  try {
+    const vendor_id = req.user.id;
+    const { id } = req.params;
+
+    const checkVendor = await db.query(
+        "Select * from product where product_id = ?", 
+        [id]);
 
 
+    if (vendor_id != checkVendor[0][0].vendor_id)
+      throw new Error("You are not the seller of this product. You can not perform this operation.");
 
-exports.delete = async (req,res) =>{
-    try{
-        const {id} = req.params
+    const [del] = await db.query("Delete FROM product WHERE product_id = ? ", [id]);
 
-        const [del] = await db.query ('Delete FROM product WHERE id = ? ',
-        [id]
-        )
-
-        if(del.affectedRows === 0)
-        {
-            throw new Error ("Product not found")
-        }
-
-        return res.status(200).json({message:"Product Deleted"})
-
+    if (del.length === 0) {
+      throw new Error("Product not found");
     }
-    catch(error)
+
+    return res.status(200).json({ message: "Product Deleted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAll = async (req, res) => {
+  try {
+    const vendor_id = req.user.id;
+
+    const [rows] = await db.query(
+        "SELECT * FROM product where vendor_id = ?",
+        [vendor_id]);
+
+    if(rows.length == 0)
+        return res.status(200).json({message:"You have no product listed yet."})
+
+    return res.status(200).send(rows);
+    }
+    catch (error) 
     {
-        res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
     }
-}
+};
 
-exports.getAll = async(req,res) => {
-    try{
-        const [rows] = await db.query ('SELECT * FROM product')
-        return res.status(200).send(rows)
-    }
-    catch(error)
-    {
-        res.status(500).json({ error: error.message });
-    }
-}
+exports.getById = async (req, res) => {
+  try {
+    
+    const vendor_id = req.user.id;
+    const {id} = req.params;
 
-exports.getById = async(req,res) => {
-    try{
-        const {id} = req.params;
-        const [row] = await db.query('SELECT * FROM product WHERE id = ?' ,
-            [id]
-        )
-        if(row.affectedRows === 0)
-        {
-            throw new Error ("No Such Product Found")
-        }
-     return res.status(200).send(row)
-    }
-    catch(error)
+    console.log(id,vendor_id)
+
+    const [row] = await db.query(
+    "SELECT * FROM product WHERE (product_id, vendor_id) = (?, ?)",
+    [id, vendor_id]
+    );
+
+    if (row.length === 0) 
     {
-        res.status(500).json({ error: error.message });
+      throw new Error("No Such Product Found");
     }
-}
+    return res.status(200).send(row);
+    } 
+    catch (error) 
+    {
+    res.status(500).json({ error: error.message });
+    }
+};
