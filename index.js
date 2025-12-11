@@ -7,6 +7,7 @@ const port = process.env.DB_PORT;
 //route
 const productRoute = require('./route/productR')
 const sellerRoute = require('./route/vendorR')
+const userRoute = require('./route/userR')
 
 //middlewares
 app.use(express.json());
@@ -22,6 +23,7 @@ app.get("/",(req,res)=>{
 })
 app.use('/product',productRoute)
 app.use('/seller',sellerRoute)
+app.use('/user',userRoute)
 
 app.listen(port,()=>{
     console.log(`server running at port ${port}`)
