@@ -64,18 +64,19 @@ exports.loginProfile = async(req,res) =>{
 
 exports.deleteProfile = async (req,res) =>{
     try{
+        // const id = req.user.id;
         const {id} = req.params
 
-        const [del] = await db.query ('Delete FROM seller WHERE seller_id = ? ',
+        const [del] = await db.query ('Delete FROM user WHERE user_id = ? ',
         [id]
         )
 
         if(del.length === 0)
         {
-            throw new Error ("Seller account not found")
+            throw new Error ("User account not found")
         }
 
-        return res.status(200).json({message:"Seller account Deleted"})
+        return res.status(200).json({message:"User account Deleted"})
 
     }
     catch(error)
@@ -88,7 +89,7 @@ exports.deleteProfile = async (req,res) =>{
 exports.updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone_no, currentPassword, newPassword } = req.body;
+    const { name, email, phone_no, currentPassword, newPassword, address } = req.body;
 
     const fields = [];
     const values = [];
@@ -108,6 +109,11 @@ exports.updateProfile = async (req, res) => {
       values.push(phone_no);
     }
 
+    if (address !== undefined) {
+      fields.push("address = ?");
+      values.push(address);
+    }
+
     if (newPassword !== undefined) {
       if (!currentPassword) {
         return res
@@ -116,12 +122,12 @@ exports.updateProfile = async (req, res) => {
       }
 
       const [rows] = await db.query(
-        "SELECT password FROM seller WHERE seller_id = ?",
+        "SELECT password FROM user WHERE user_id = ?",
         [id]
       );
 
       if (!rows || rows.length === 0) {
-        return res.status(404).json({ message: "Seller account not found" });
+        return res.status(404).json({ message: "User account not found" });
       }
 
       const vendor = rows[0];
@@ -149,16 +155,16 @@ exports.updateProfile = async (req, res) => {
         .json({ message: "Provide at least one field to update" });
     }
 
-    const sql = `UPDATE seller SET ${fields.join(", ")} WHERE seller_id = ?`;
+    const sql = `UPDATE user SET ${fields.join(", ")} WHERE user_id = ?`;
     values.push(id);
 
     const [update] = await db.query(sql, values);
 
     if (update.affectedRows === 0) {
-      return res.status(404).json({ message: "Seller account not found" });
+      return res.status(404).json({ message: "User account not found" });
     }
 
-    return res.status(200).json({ message: "Seller account Updated" });
+    return res.status(200).json({ message: "User account Updated" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -168,8 +174,9 @@ exports.updateProfile = async (req, res) => {
 
 exports.getProfile = async(req,res) =>{
     try{
-        const id = req.user.id;
-        const [row] = await db.query('SELECT seller_id, name, email, phone_no FROM seller WHERE seller_id = ?', [id])
+        // const id = req.user.id;
+        const {id} = req.params
+        const [row] = await db.query('SELECT user_id, name, email, phone_no, address FROM user WHERE user_id = ?', [id])
 
         if(row.length == 0)
             return res.status(404).json({message:"No such seller account found"})

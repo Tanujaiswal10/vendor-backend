@@ -5,9 +5,9 @@ const authorization = require('../middleware/vendorM')
 
 route.post('/create',userController.createProfile);
 route.post('/login',userController.loginProfile);
-// route.patch('/update/:id',authorization,sellerController.updateProfile);
-// route.delete('/delete/:id',authorization,sellerController.deleteProfile);
-// route.get('/getById',authorization,sellerController.getProfile);
+route.patch('/update/:id',userController.updateProfile);
+route.delete('/delete/:id',userController.deleteProfile);
+route.get('/getById/:id',userController.getProfile);
 
 
 module.exports = route;
