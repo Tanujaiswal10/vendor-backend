@@ -35,7 +35,7 @@ exports.loginProfile = async(req,res) =>{
 
 exports.updateProfile = async(req,res) => {
     try{
-        const{id} =req.params
+        const id = req.user.id
         if(!id)
             throw new Error("Please provide the Id of User Account")
 
@@ -50,7 +50,7 @@ exports.updateProfile = async(req,res) => {
 
 exports.deleteProfile = async(req,res) => {
     try{
-        const{id} =req.params
+        const id = req.user.id
         if(!id)
             throw new Error("Please provide the Id of the User Account")
 
@@ -66,8 +66,7 @@ exports.deleteProfile = async(req,res) => {
 
 exports.getProfile = async(req,res) =>{
     try{
-        // const id = req.user.id;
-        const {id} = req.params
+        const id = req.user.id;
 
         if(!id)
             throw new Error("Please provide the Id of the User Account")

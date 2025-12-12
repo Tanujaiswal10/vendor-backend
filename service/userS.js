@@ -64,8 +64,7 @@ exports.loginProfile = async(req,res) =>{
 
 exports.deleteProfile = async (req,res) =>{
     try{
-        // const id = req.user.id;
-        const {id} = req.params
+        const id = req.user.id;
 
         const [del] = await db.query ('Delete FROM user WHERE user_id = ? ',
         [id]
@@ -88,7 +87,7 @@ exports.deleteProfile = async (req,res) =>{
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { id } = req.params;
+     const id = req.user.id
     const { name, email, phone_no, currentPassword, newPassword, address } = req.body;
 
     const fields = [];
@@ -174,9 +173,8 @@ exports.updateProfile = async (req, res) => {
 
 exports.getProfile = async(req,res) =>{
     try{
-        // const id = req.user.id;
-        const {id} = req.params
-        const [row] = await db.query('SELECT user_id, name, email, phone_no, address FROM user WHERE user_id = ?', [id])
+        const id = req.user.id;
+         const [row] = await db.query('SELECT user_id, name, email, phone_no, address FROM user WHERE user_id = ?', [id])
 
         if(row.length == 0)
             return res.status(404).json({message:"No such seller account found"})
